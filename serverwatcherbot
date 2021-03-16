@@ -84,4 +84,4 @@ async def on_message(message):
                                            + tich_status)
             time.sleep(30)
 
-client.run('TOKEN')
+client.run('ODIxNDE0NjM5NTIxODkwMzc1.YFDX_w.oeIxgHyemgPCh5uWTIzytTy_IWQ')
