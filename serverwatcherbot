@@ -1,0 +1,87 @@
+from bs4 import BeautifulSoup
+from selenium import webdriver
+import time
+import discord
+
+client = discord.Client()
+
+
+@client.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(client))
+
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content.startswith('$serverwatcher'):
+        await message.channel.send('Initializing Server Status Watcher...')
+        # initialize values
+        url = 'https://worldofwarcraft.com/en-us/game/status/us'
+        initial_status = 0
+
+        # settings for headless chrome
+        options = webdriver.ChromeOptions()
+        options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--incognito')
+        options.add_argument('--headless')
+        driver = webdriver.Chrome('PATH', options=options)
+
+        # Initial fetch the page
+        driver.get(url)
+
+        # parse the page
+        html = driver.page_source
+        soup = BeautifulSoup(html, features="html.parser")
+
+        # Scrape realm list
+        tables = soup.findChildren("div", {"class": "SortTable-body"})
+        table_realm = tables[0]
+        rows = table_realm.findChildren("div", {"class": "SortTable-row"})
+
+        for row in rows:
+            cells = row.findChildren("div", {"class": "SortTable-data"})
+            if len(cells) > 0:
+                # Our realm name is in the second column
+                realm_name = cells[1].text.strip()
+                # Population seems to be in the fourth column
+                population = cells[3].text.strip()
+
+                if realm_name == "Tichondrius":
+                    initial_status = population
+
+        tich_status = initial_status
+        await message.channel.send('Started watching Server Tichondrius, Initial status is: ' + initial_status)
+
+        while tich_status == initial_status:
+            # fetch the page
+            driver.get(url)
+
+            # parse the page
+            html = driver.page_source
+            soup = BeautifulSoup(html, features="html.parser")
+
+            # Scrape realm list
+            tables = soup.findChildren("div", {"class": "SortTable-body"})
+            table_realm = tables[0]
+            rows = table_realm.findChildren("div", {"class": "SortTable-row"})
+
+            for row in rows:
+                cells = row.findChildren("div", {"class": "SortTable-data"})
+                if len(cells) > 0:
+                    # Our realm name is in the second column
+                    realm_name = cells[1].text.strip()
+                    # Population seems to be in the fourth column in our row
+                    population = cells[3].text.strip()
+
+                    if realm_name == "Tichondrius":
+                        tich_status = population
+
+            if tich_status != initial_status:
+                await message.channel.send('@wow Server Status Change Detected!  Server status on Tichondrius is now: '
+                                           + tich_status)
+            time.sleep(30)
+
+client.run('TOKEN')
