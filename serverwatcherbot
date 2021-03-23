@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
+
+import os
 import time
 import discord
 
@@ -84,4 +86,8 @@ async def on_message(message):
                                            + tich_status)
             time.sleep(30)
 
-client.run('TOKEN')
+if token := os.getenv("DISCORD_API_TOKEN"):
+    client.run(token)
+else:
+    print("Error: DISCORD_API_TOKEN not specified in the environment. Quitting.")
+    exit(1)
