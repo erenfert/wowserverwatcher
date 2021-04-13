@@ -84,7 +84,7 @@ async def on_message(message):
                         tich_status = population
 
             if tich_status != initial_status:
-                await message.channel.send('@wow Server Status Change Detected!  Server status on Tichondrius is now: '
+                await message.channel.send('@WoW Server Status Change Detected!  Server status on Tichondrius is now: '
                                            + tich_status)
             time.sleep(30)
 
