@@ -18,6 +18,9 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    if message.content.startswith('$watcherversion'):
+        await message.channel.send('Current Version 1.0.0')
+        
     if message.content.startswith('$serverwatcher'):
         await message.channel.send('Initializing Server Status Watcher...')
         # initialize values
